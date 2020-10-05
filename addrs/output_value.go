@@ -12,7 +12,8 @@ import (
 // values cannot be represented from the module where they are defined,
 // OutputValue is not Referenceable, while ModuleCallOutput is.
 type OutputValue struct {
-	Name string
+	Name        string
+	Description string
 }
 
 func (v OutputValue) String() string {

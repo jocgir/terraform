@@ -142,6 +142,23 @@ func (b *Local) opPlan(
 		b.ReportResult(runningOp, diags)
 		return
 	}
+
+	// Determine if output attributes (description, sensitive) have changed
+	changes := plan.Changes.SyncWrapper()
+	for _, c := range plan.Changes.Outputs {
+		previousOutput := priorState.OutputValue(c.Addr)
+		if previousOutput == nil {
+			previousOutput = &states.OutputValue{}
+		}
+		newOutput := changes.GetOutputChange(c.Addr)
+		if previousOutput.Description != newOutput.Addr.OutputValue.Description {
+			changes.AppendOutputChangeAttribute(c.Addr, "description", cty.StringVal(c.Addr.OutputValue.Description))
+		}
+		if previousOutput.Sensitive != c.Sensitive {
+			changes.AppendOutputChangeAttribute(c.Addr, "sensitive", cty.BoolVal(c.Sensitive))
+		}
+	}
+
 	// Record whether this plan includes any side-effects that could be applied.
 	runningOp.PlanEmpty = !planHasSideEffects(priorState, plan.Changes)
 
@@ -376,6 +393,20 @@ func RenderPlan(plan *plans.Plan, baseState *states.State, priorState *states.St
 			if priorOutputState := priorState.OutputValue(addr); priorOutputState != nil {
 				sensitive = sensitive || priorOutputState.Sensitive
 				before = priorOutputState.Value
+			} else if split := strings.Split(addr.OutputValue.Name, "."); len(split) == 2 {
+				// Check if the change applies to an output attributes
+				actualAddr := addrs.AbsOutputValue{
+					Module:      addr.Module,
+					OutputValue: addrs.OutputValue{Name: split[0]},
+				}
+				if priorOutputState = priorState.OutputValue(actualAddr); priorOutputState != nil {
+					switch split[1] {
+					case "description":
+						before = cty.StringVal(priorOutputState.Description)
+					case "sensitive":
+						before = cty.BoolVal(priorOutputState.Sensitive)
+					}
+				}
 			}
 
 			// We'll now construct ourselves a new, accurate change.

@@ -93,7 +93,7 @@ func (s *SyncState) SetOutputValue(addr addrs.AbsOutputValue, value cty.Value, s
 	defer s.lock.Unlock()
 
 	ms := s.state.EnsureModule(addr.Module)
-	ms.SetOutputValue(addr.OutputValue.Name, value, sensitive)
+	ms.SetOutputValueWithDescription(addr.OutputValue.Name, addr.OutputValue.Description, value, sensitive)
 }
 
 // RemoveOutputValue removes the stored value for the output value with the

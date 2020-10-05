@@ -36,8 +36,9 @@ type stateValues struct {
 }
 
 type output struct {
-	Sensitive bool            `json:"sensitive"`
-	Value     json.RawMessage `json:"value,omitempty"`
+	Sensitive   bool            `json:"sensitive"`
+	Description string          `json:"description,omitempty"`
+	Value       json.RawMessage `json:"value,omitempty"`
 }
 
 // module is the representation of a module in state. This can be the root module
@@ -178,8 +179,9 @@ func marshalOutputs(outputs map[string]*states.OutputValue) (map[string]output, 
 			return ret, err
 		}
 		ret[k] = output{
-			Value:     ov,
-			Sensitive: v.Sensitive,
+			Value:       ov,
+			Sensitive:   v.Sensitive,
+			Description: v.Description,
 		}
 	}
 

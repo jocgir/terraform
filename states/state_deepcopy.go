@@ -218,8 +218,9 @@ func (os *OutputValue) DeepCopy() *OutputValue {
 	}
 
 	return &OutputValue{
-		Addr:      os.Addr,
-		Value:     os.Value,
-		Sensitive: os.Sensitive,
+		Addr:        os.Addr,
+		Description: os.Description,
+		Value:       os.Value,
+		Sensitive:   os.Sensitive,
 	}
 }

@@ -136,9 +136,10 @@ func (c *OutputCommand) Run(args []string) int {
 			// for compatibility, so this is an emulation of the JSON
 			// serialization of outputs used in state format version 3.
 			type OutputMeta struct {
-				Sensitive bool            `json:"sensitive"`
-				Type      json.RawMessage `json:"type"`
-				Value     json.RawMessage `json:"value"`
+				Sensitive   bool            `json:"sensitive"`
+				Description string          `json:"description,omitempty"`
+				Type        json.RawMessage `json:"type"`
+				Value       json.RawMessage `json:"value"`
 			}
 			outputs := map[string]OutputMeta{}
 
@@ -156,9 +157,10 @@ func (c *OutputCommand) Run(args []string) int {
 					return 1
 				}
 				outputs[n] = OutputMeta{
-					Sensitive: os.Sensitive,
-					Type:      json.RawMessage(jsonType),
-					Value:     json.RawMessage(jsonVal),
+					Sensitive:   os.Sensitive,
+					Description: os.Description,
+					Type:        json.RawMessage(jsonType),
+					Value:       json.RawMessage(jsonVal),
 				}
 			}
 

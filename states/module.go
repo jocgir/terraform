@@ -255,15 +255,19 @@ func (ms *Module) maybeRestoreResourceInstanceDeposed(addr addrs.ResourceInstanc
 // SetOutputValue writes an output value into the state, overwriting any
 // existing value of the same name.
 func (ms *Module) SetOutputValue(name string, value cty.Value, sensitive bool) *OutputValue {
+	return ms.SetOutputValueWithDescription(name, "", value, sensitive)
+}
+
+// SetOutputValueWithDescription writes an output value into the state along with its description.
+func (ms *Module) SetOutputValueWithDescription(name, description string, value cty.Value, sensitive bool) *OutputValue {
 	os := &OutputValue{
 		Addr: addrs.AbsOutputValue{
-			Module: ms.Addr,
-			OutputValue: addrs.OutputValue{
-				Name: name,
-			},
+			Module:      ms.Addr,
+			OutputValue: addrs.OutputValue{Name: name},
 		},
-		Value:     value,
-		Sensitive: sensitive,
+		Value:       value,
+		Sensitive:   sensitive,
+		Description: description,
 	}
 	ms.OutputValues[name] = os
 	return os

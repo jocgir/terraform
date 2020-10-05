@@ -42,7 +42,7 @@ func (t *OutputTransformer) transform(g *Graph, c *configs.Config) error {
 	// through the presence of "count" or "for_each" on the modules.
 	for _, o := range c.Module.Outputs {
 		node := &nodeExpandOutput{
-			Addr:   addrs.OutputValue{Name: o.Name},
+			Addr:   addrs.OutputValue{Name: o.Name, Description: o.Description},
 			Module: c.Path,
 			Config: o,
 		}
