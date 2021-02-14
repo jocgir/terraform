@@ -53,7 +53,7 @@ func (t *OutputTransformer) transform(g *Graph, c *configs.Config) error {
 	}
 
 	for _, o := range c.Module.Outputs {
-		addr := addrs.OutputValue{Name: o.Name}
+		addr := addrs.OutputValue{Name: o.Name, Description: o.Description}
 
 		var rootChange *plans.OutputChangeSrc
 		for _, c := range changes {

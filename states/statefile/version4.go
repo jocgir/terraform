@@ -264,6 +264,7 @@ func prepareStateV4(sV4 *stateV4) (*File, tfdiags.Diagnostics) {
 					},
 				},
 			}
+			os.Description = fos.Description
 			os.Sensitive = fos.Sensitive
 
 			ty, err := ctyjson.UnmarshalType([]byte(fos.ValueTypeRaw))
@@ -345,6 +346,7 @@ func writeStateV4(file *File, w io.Writer) tfdiags.Diagnostics {
 
 		sV4.RootOutputs[name] = outputStateV4{
 			Sensitive:    os.Sensitive,
+			Description:  os.Description,
 			ValueRaw:     json.RawMessage(src),
 			ValueTypeRaw: json.RawMessage(typeSrc),
 		}
@@ -517,6 +519,7 @@ func (s *stateV4) normalize() {
 type outputStateV4 struct {
 	ValueRaw     json.RawMessage `json:"value"`
 	ValueTypeRaw json.RawMessage `json:"type"`
+	Description  string          `json:"description"`
 	Sensitive    bool            `json:"sensitive,omitempty"`
 }
 

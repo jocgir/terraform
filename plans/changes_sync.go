@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/addrs"
 	"github.com/hashicorp/terraform/states"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // ChangesSync is a wrapper around a Changes that provides a concurrency-safe
@@ -144,6 +145,29 @@ func (cs *ChangesSync) AppendOutputChange(changeSrc *OutputChangeSrc) {
 
 	s := changeSrc.DeepCopy()
 	cs.changes.Outputs = append(cs.changes.Outputs, s)
+}
+
+// AppendOutputChangeAttribute records the given output attribute change in the set of
+// planned value changes.
+//
+// The caller must ensure that there are no concurrent writes to the given
+// change while this method is running, but it is safe to resume mutating
+// it after this method returns without affecting the saved change.
+func (cs *ChangesSync) AppendOutputChangeAttribute(addr addrs.AbsOutputValue, attributeName string, newValue cty.Value) {
+	change := &OutputChange{
+		Addr: addrs.AbsOutputValue{
+			Module:      addr.Module,
+			OutputValue: addrs.OutputValue{Name: fmt.Sprintf("%s.%s", addr.OutputValue.Name, attributeName)},
+		},
+		Change: Change{Action: Update, After: newValue},
+	}
+	encoded, err := change.Encode()
+	if err != nil {
+		// Should never happen, since we just constructed this right above
+		panic(fmt.Sprintf("planned change for %s could not be encoded: %s", change.Addr, err))
+	}
+	cs.AppendOutputChange(encoded)
+
 }
 
 // GetOutputChange searches the set of output value changes for one matching

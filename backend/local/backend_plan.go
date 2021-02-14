@@ -10,6 +10,7 @@ import (
 
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/colorstring"
+	"github.com/zclconf/go-cty/cty"
 
 	"github.com/hashicorp/terraform/addrs"
 	"github.com/hashicorp/terraform/backend"
@@ -108,6 +109,22 @@ func (b *Local) opPlan(
 	if planDiags.HasErrors() {
 		b.ReportResult(runningOp, diags)
 		return
+	}
+
+	// Determine if output attributes (description, sensitive) have changed
+	changes := plan.Changes.SyncWrapper()
+	for _, c := range plan.Changes.Outputs {
+		previousOutput := plan.Changes.OutputValue(c.Addr)
+		if previousOutput == nil {
+			previousOutput = &states.OutputValue{}
+		}
+		newOutput := changes.GetOutputChange(c.Addr)
+		if previousOutput.Description != newOutput.Addr.OutputValue.Description {
+			changes.AppendOutputChangeAttribute(c.Addr, "description", cty.StringVal(c.Addr.OutputValue.Description))
+		}
+		if previousOutput.Sensitive != c.Sensitive {
+			changes.AppendOutputChangeAttribute(c.Addr, "sensitive", cty.BoolVal(c.Sensitive))
+		}
 	}
 
 	// Record whether this plan includes any side-effects that could be applied.
